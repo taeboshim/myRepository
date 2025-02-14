@@ -15,6 +15,9 @@ const PostSchema=new mongoose.Schema({
         type: Date,
         default:Date.now(),
     },
+    imageUrl:{
+        type:String,
+    }
 });
 
 module.exports=mongoose.model("Post", PostSchema);
