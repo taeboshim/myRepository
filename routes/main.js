@@ -1,4 +1,4 @@
-// 커밋 테스트2 
+
 const express = require("express");
 const router = express.Router();
 const mainLayout = "../views/layouts/main.ejs";
@@ -8,9 +8,10 @@ const { dalle } = require("../openai");
 
 router.get(["/", "/home"], asyncHandler(async (req, res) => {
     const locals = { title: "Home" };
-    const data = await Post.find({});
+    const data = await Post.find({}).sort({ createdAt: -1 }); // 최신순 정렬 추가
     res.render("index", { locals, data, layout: mainLayout });
 }));
+
 
 router.get("/post/:id", asyncHandler(async (req, res) => {
     const data = await Post.findOne({ _id: req.params.id });
@@ -26,7 +27,6 @@ router.get("/generate-image/:id", asyncHandler(async (req, res) => {
         }
 
         // 게시물 내용 기반으로 이미지 생성
-        // const prompt = `Create an artistic, detailed image about: ${post.title}. Description: ${post.body}`;
         const prompt = `Create a visually stunning and contextually accurate image based on the post: "${post.title}". 
 Illustrate a scene that best represents the main idea, highlighting key themes and emotions from the text: "${post.body}". 
 Incorporate essential elements that define the atmosphere and narrative of the post, ensuring an engaging and artistic depiction.
