@@ -1,0 +1,28 @@
+<!-- 제목 -->
+<h1><%= data.title %></h1>
+<!-- 날짜 표기 추가 -->
+<h5><%= new Date(data.createdAt).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) %></h5>
+
+<article class="article">
+    <%= data.body %>
+</article>
+
+<!-- AI 생성 이미지 표시 -->
+<div>
+    <h3>AI가 생성한 이미지</h3>
+    <img id="generatedImage" src="https://via.placeholder.com/1024?text=Generating..." alt="AI 생성 이미지">
+</div>
+
+<script>
+    // DALL·E API를 호출하여 이미지 가져오기
+    fetch(`/generate-image/<%= data._id %>`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.imageUrl) {
+                document.getElementById("generatedImage").src = data.imageUrl;
+            } else {
+                document.getElementById("generatedImage").alt = "이미지를 생성할 수 없습니다.";
+            }
+        })
+        .catch(error => console.error("이미지를 불러오는 중 오류 발생:", error));
+</script>
