@@ -6,11 +6,14 @@
 <article class="article">
     <%= data.body %>
 </article>
-
-<!-- AI 생성 이미지 표시 -->
 <div>
-    <h3>AI가 생성한 이미지</h3>
-    <img id="generatedImage" src="https://via.placeholder.com/1024?text=Generating..." alt="AI 생성 이미지">
+    <h3>오늘의 내 모습</h3>
+
+    <!-- 로딩 애니메이션 -->
+    <div id="loadingIcon" class="loading-spinner"></div>
+
+    <!-- AI 생성 이미지 -->
+    <img id="generatedImage" src="" alt="AI 생성 이미지" style="display: none; max-width: 100%;">
 </div>
 
 <script>
@@ -20,9 +23,18 @@
         .then(data => {
             if (data.imageUrl) {
                 document.getElementById("generatedImage").src = data.imageUrl;
+                document.getElementById("generatedImage").style.display = "block"; // 이미지 표시
             } else {
                 document.getElementById("generatedImage").alt = "이미지를 생성할 수 없습니다.";
             }
         })
-        .catch(error => console.error("이미지를 불러오는 중 오류 발생:", error));
+        .catch(error => {
+            console.error("이미지를 불러오는 중 오류 발생:", error);
+            document.getElementById("generatedImage").alt = "이미지를 불러오지 못했습니다.";
+        })
+        .finally(() => {
+            document.getElementById("loadingIcon").style.display = "none"; // 로딩 애니메이션 숨김
+        });
 </script>
+
+
