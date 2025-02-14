@@ -1,12 +1,20 @@
 <!-- 제목 -->
 <h1><%= data.title %></h1>
+
 <!-- 날짜 표기 추가 -->
-<h5><%= new Date(data.createdAt).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) %></h5>
+<h5><%= new Date(data.createdAt).toLocaleString('ko-KR', { 
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit' 
+}) %></h5>
 
 <article class="article">
     <%= data.body %>
 </article>
 <div>
+
     <h3>오늘의 내 모습</h3>
 
     <!-- 로딩 애니메이션 -->

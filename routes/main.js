@@ -34,6 +34,10 @@ Avoid using any text, words, or letter-like symbols. Allow for abstract symbols 
 
         const imageUrl = await dalle.text2im({ prompt });
 
+        // 데이터베이스에 imageUrl 저장
+        post.imageUrl=imageUrl;
+        await post.save();
+
         res.json({ imageUrl });
     } catch (error) {
         console.error(error);
