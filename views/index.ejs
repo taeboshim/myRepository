@@ -8,7 +8,10 @@
 
 <!-- 최근 게시물 -->
 <section class="articles">
-    <h2 class="articles-heading">나의 하루들</h2>
+    <div class="articles-header">
+        <h2 class="articles-heading">최근 게시물</h2>
+        <a href="/add" class="new-post-button">새 게시물</a>
+      </div>
     <ul class="article-ul">
         <% data.forEach(post => { %>
             <li class="article-item">
@@ -105,3 +108,4 @@
         margin-left: auto; /* 날짜를 오른쪽 끝으로 이동 */
     }
 </style>
+

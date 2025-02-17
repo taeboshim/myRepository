@@ -307,3 +307,30 @@ img {
   animation: spin 1s linear infinite;
   margin: 20px auto;
 }
+.articles-header {
+  display: flex;
+  align-items: center; /* 버튼과 제목을 같은 높이로 정렬 */
+  width: 100%;
+}
+
+.articles-heading {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 2; /* 불필요한 여백 제거 */
+}
+
+.new-post-button {
+  font-weight: bold;
+  background-color: yellow; /* 밝은 노란색 */
+  color: black;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  margin-left: auto; /* 버튼을 오른쪽으로 이동 */
+}
+
+.new-post-button:hover {
+  background-color: rgb(47, 233, 15); /* 연한 노란색으로 변경 */
+}
+
