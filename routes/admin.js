@@ -65,6 +65,39 @@ router.post(
     })
 );
 
+// 🔹 회원가입 페이지 렌더링
+router.get("/register", (req, res) => {
+    res.render("admin/register", { title: "회원가입", layout: adminLayout2 });
+});
+
+// 🔹 회원가입 처리
+router.post(
+    "/register",
+    asyncHandler(async (req, res) => {
+        const { username, password } = req.body;
+
+        // 이미 존재하는 사용자 확인
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ message: "이미 존재하는 사용자입니다." });
+        }
+
+        // 비밀번호 암호화
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // 새 사용자 생성
+        const newUser = new User({
+            username: username,
+            password: hashedPassword,
+        });
+
+        await newUser.save();
+        res.redirect("/admin"); // 회원가입 후 로그인 페이지로 이동
+    })
+);
+
+// 게시물 목록 페이지 (로그인 필요)
 router.get(
     "/allPosts",
     checkLogin,
@@ -89,6 +122,7 @@ router.get("/logout", (req, res) => {
     res.redirect("/");
 });
 
+// 게시물 작성
 router.get(
     "/add",
     checkLogin,
@@ -103,6 +137,7 @@ router.get(
     })
 );
 
+// 게시물 추가
 router.post(
     "/add",
     checkLogin,
@@ -119,6 +154,7 @@ router.post(
     })
 );
 
+// 게시물 수정
 router.get(
     "/edit/:id",
     checkLogin,
@@ -136,6 +172,7 @@ router.get(
     })
 );
 
+// 게시물 게시물 수정 처리
 router.put(
     "/edit/:id",
     checkLogin,
@@ -150,6 +187,7 @@ router.put(
     })
 );
 
+// 게시물 삭제
 router.delete(
     "/delete/:id",
     checkLogin,
