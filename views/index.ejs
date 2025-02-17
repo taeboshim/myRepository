@@ -8,17 +8,21 @@
 
       <!-- 최근 게시물 -->
       <section class="articles">
-        <h2 class="articles-heading">최근 게시물</h2>
+        <div class="articles-header">
+          <h2 class="articles-heading">최근 게시물</h2>
+          <a href="/add" class="new-post-button">새 게시물</a>
+        </div>
         <ul class="article-ul">
-            <% data.forEach(post => { %>
-                <li>
-                    <a href="/post/<%= post._id %>">
-                        <span><%= post.title %></span>
-                        <span class="article-list-date">
-                            <%= post.createdAt.toDateString() %>
-                        </span>
-                    </a>
-                </li>
-            <% }) %>
+          <% data.forEach(post => { %>
+            <li>
+              <a href="/post/<%= post._id %>">
+                <span><%= post.title %></span>
+                <span class="article-list-date">
+                  <%= post.createdAt.toDateString() %>
+                </span>
+              </a>
+            </li>
+          <% }) %>
         </ul>
       </section>
+      
