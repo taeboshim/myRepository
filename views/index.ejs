@@ -1,24 +1,107 @@
-      <!-- 상단 소개글, 히어로 이미지 -->
-      <div class="top">
-        <h1 class="top-heading">MyStory</h1>
-        <p class="top-body">당신의 하루를 기록하세요.</p>
-      </div>
+<!-- 상단 소개글, 히어로 이미지 -->
+<div class="top">
+    <h1 class="top-heading">MyStory</h1>
+    <p class="top-body">당신의 하루를 기록하세요.</p>
+</div>
 
-      <img src="/img/MyStory.png" alt="MyStory" class="hero-image" width="840" height="400">
+<img src="/img/MyStory.png" alt="MyStory" class="hero-image" width="840" height="400">
 
-      <!-- 최근 게시물 -->
-      <section class="articles">
-        <h2 class="articles-heading">최근 게시물</h2>
-        <ul class="article-ul">
-            <% data.forEach(post => { %>
-                <li>
-                    <a href="/post/<%= post._id %>">
-                        <span><%= post.title %></span>
-                        <span class="article-list-date">
-                            <%= post.createdAt.toDateString() %>
-                        </span>
-                    </a>
-                </li>
-            <% }) %>
-        </ul>
-      </section>
+<!-- 최근 게시물 -->
+<section class="articles">
+    <h2 class="articles-heading">나의 하루들</h2>
+    <ul class="article-ul">
+        <% data.forEach(post => { %>
+            <li class="article-item">
+                <a href="/post/<%= post._id %>" class="article-link">
+                    <!-- AI 생성 이미지 표시 (크기: width 230px, height 150px) -->
+                    <% if (post.imageUrl) { %>
+                        <img src="<%= post.imageUrl %>" alt="AI 생성 이미지" class="article-thumbnail" width="230" height="150">
+                    <% } else { %>
+                        <div class="no-image-placeholder">이미지 없음</div>
+                    <% } %>
+
+                    <div class="article-content">
+                        <!-- 게시물 제목 (폰트 크기: 30px) -->
+                        <h3 class="article-title"><%= post.title %></h3>
+                        
+                        <!-- 간략한 일기 내용 (30자까지만 표시, 폰트 크기: 15px) -->
+                        <p class="article-summary">
+                            <%= post.body.length > 30 ? post.body.substring(0, 30) + "..." : post.body %>
+                        </p>
+                    </div>
+
+                    <!-- 작성 날짜 (오른쪽 끝 정렬) -->
+                    <span class="article-list-date"><%= post.createdAt.toDateString() %></span>
+                </a>
+            </li>
+        <% }) %>
+    </ul>
+</section>
+
+<!-- 스타일 추가 -->
+<style>
+    .article-ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .article-item {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+        justify-content: space-between; /* 날짜를 오른쪽으로 이동 */
+    }
+
+    .article-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+        width: 100%;
+    }
+
+    .article-thumbnail {
+        width: 230px;
+        height: 150px;
+        border-radius: 10px;
+        margin-right: 15px;
+        object-fit: cover;
+    }
+
+    .no-image-placeholder {
+        width: 230px;
+        height: 150px;
+        background-color: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: #777;
+        border-radius: 10px;
+        margin-right: 15px;
+    }
+
+    .article-content {
+        flex: 1;
+    }
+
+    .article-title {
+        font-size: 30px;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .article-summary {
+        font-size: 15px;
+        color: #555;
+        margin: 5px 0;
+    }
+
+    .article-list-date {
+        font-size: 12px;
+        color: #999;
+        white-space: nowrap; /* 줄 바꿈 방지 */
+        margin-left: auto; /* 날짜를 오른쪽 끝으로 이동 */
+    }
+</style>
