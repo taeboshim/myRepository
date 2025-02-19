@@ -6,7 +6,6 @@ const axios = require("axios");
 const sharp = require("sharp");
 const Post = require("../models/Post");
 const asyncHandler = require("express-async-handler");
-const axios = require("axios"); // 이미지 다운로드를 위한 모듈
 const { dalle } = require("../openai");
 
 // 🔹 mainLayout 변수 정의
