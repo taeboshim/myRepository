@@ -17,23 +17,23 @@
 <div>
     <h3>오늘의 내 모습</h3>
 
-    <% if (data.imageUrl) { %>
-        <!-- 저장된 이미지가 있을 경우 바로 표시 -->
-        <img id="generatedImage" src="<%= data.imageUrl %>" alt="AI 생성 이미지" style="max-width: 100%;">
+    <% if (data.image) { %>
+        <!-- DB에 저장된 이미지 표시 -->
+        <img id="generatedImage" src="/image/<%= data._id %>" alt="AI 생성 이미지" style="max-width: 100%;">
     <% } else { %>
         <!-- 로딩 애니메이션 -->
         <div id="loadingIcon" class="loading-spinner"></div>
 
         <!-- AI 생성 이미지 -->
         <img id="generatedImage" src="" alt="AI 생성 이미지" style="display: none; max-width: 100%;">
-        
+
         <script>
-            // DALL·E API를 호출하여 이미지 가져오기
+            // AI 이미지 생성 요청
             fetch(`/generate-image/<%= data._id %>`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.imageUrl) {
-                        document.getElementById("generatedImage").src = data.imageUrl;
+                    if (data.imagePath) {
+                        document.getElementById("generatedImage").src = data.imagePath;
                         document.getElementById("generatedImage").style.display = "block"; // 이미지 표시
                     } else {
                         document.getElementById("generatedImage").alt = "이미지를 생성할 수 없습니다.";
@@ -49,6 +49,9 @@
         </script>
     <% } %>
 </div>
+
+
+
 
 
 

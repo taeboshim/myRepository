@@ -11,14 +11,14 @@
     <div class="articles-header">
         <h2 class="articles-heading">최근 게시물</h2>
         <a href="/add" class="new-post-button">새 게시물</a>
-      </div>
+    </div>
     <ul class="article-ul">
         <% data.forEach(post => { %>
             <li class="article-item">
                 <a href="/post/<%= post._id %>" class="article-link">
-                    <!-- AI 생성 이미지 표시 (크기: width 230px, height 150px) -->
-                    <% if (post.imageUrl) { %>
-                        <img src="<%= post.imageUrl %>" alt="AI 생성 이미지" class="article-thumbnail" width="230" height="150">
+                    <!-- AI 생성 이미지 표시 (DB에서 직접 제공, 크기: width 230px, height 150px) -->
+                    <% if (post.image) { %>
+                        <img src="/image/<%= post._id %>" alt="AI 생성 이미지" class="article-thumbnail" width="230" height="150">
                     <% } else { %>
                         <div class="no-image-placeholder">이미지 없음</div>
                     <% } %>
@@ -108,4 +108,3 @@
         margin-left: auto; /* 날짜를 오른쪽 끝으로 이동 */
     }
 </style>
-
