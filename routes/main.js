@@ -6,6 +6,7 @@ const axios = require("axios");
 const sharp = require("sharp");
 const Post = require("../models/Post");
 const asyncHandler = require("express-async-handler");
+const axios = require("axios"); // 이미지 다운로드를 위한 모듈
 const { dalle } = require("../openai");
 
 // 🔹 mainLayout 변수 정의
@@ -19,7 +20,14 @@ router.get(["/", "/home"], asyncHandler(async (req, res) => {
 
 router.get("/post/:id", asyncHandler(async (req, res) => {
     const data = await Post.findOne({ _id: req.params.id });
-    res.render("post", { data, layout: mainLayout });
+
+    // 이미지 바이너리를 Base64로 변환하여 뷰에서 표시
+    let imageBase64 = null;
+    if (data.image) {
+        imageBase64 = `data:${data.contentType};base64,${data.image.toString("base64")}`;
+    }
+
+    res.render("post", { data, imageBase64, layout: mainLayout });
 }));
 
 // 🔹 AI 이미지 생성 및 저장 (이미지를 파일로 저장하고, DB에는 Buffer 데이터 저장)
