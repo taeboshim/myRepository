@@ -6,6 +6,7 @@ const axios = require("axios");
 const sharp = require("sharp");
 const Post = require("../models/Post");
 const asyncHandler = require("express-async-handler");
+const axios = require("axios"); // 이미지 다운로드를 위한 모듈
 const { dalle } = require("../openai");
 
 // 🔹 mainLayout 변수 정의
@@ -19,7 +20,14 @@ router.get(["/", "/home"], asyncHandler(async (req, res) => {
 
 router.get("/post/:id", asyncHandler(async (req, res) => {
     const data = await Post.findOne({ _id: req.params.id });
-    res.render("post", { data, layout: mainLayout });
+
+    // 이미지 바이너리를 Base64로 변환하여 뷰에서 표시
+    let imageBase64 = null;
+    if (data.image) {
+        imageBase64 = `data:${data.contentType};base64,${data.image.toString("base64")}`;
+    }
+
+    res.render("post", { data, imageBase64, layout: mainLayout });
 }));
 
 // 🔹 AI 이미지 생성 및 저장 (이미지를 파일로 저장하고, DB에는 Buffer 데이터 저장)
@@ -30,15 +38,16 @@ router.get("/generate-image/:id", asyncHandler(async (req, res) => {
             return res.status(404).json({ message: "게시물을 찾을 수 없습니다" });
         }
 
-        // 🔹 기존 이미지가 있으면 API 호출 없이 제공
+        // 🔹 이미지가 이미 존재하면 API 호출 없이 반환
         if (post.image) {
-            return res.json({ message: "이미 이미지가 저장되어 있습니다." });
+            return res.json({ message: "이미지가 이미 존재합니다" });
         }
 
-        // 🔹 DALL·E API를 호출하여 이미지 생성
-        const prompt = `Create a visually stunning and contextually accurate image based on the post: "${post.title}".`;
-        const dalleResponse = await dalle.text2im({ prompt });
-        const imageUrl = dalleResponse;
+        // 🔹 AI 이미지 생성 요청
+        const prompt = `Create a visually stunning and contextually accurate image based on the post: "${post.title}". 
+Illustrate a scene that best represents the main idea, highlighting key themes and emotions from the text: "${post.body}". 
+Incorporate essential elements that define the atmosphere and narrative of the post, ensuring an engaging and artistic depiction.
+Avoid using any text, words, or letter-like symbols. Allow for abstract symbols like arrows or icons if necessary.`;
 
         // 🔹 AI 이미지 다운로드
         const imageResponse = await axios.get(imageUrl, { responseType: "arraybuffer" });
