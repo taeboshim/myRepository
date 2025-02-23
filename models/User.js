@@ -8,7 +8,7 @@ const userSchema=new mongoose.Schema({
     },
     password:{
         type:String, // 자료 유형은 문자열
-        required:true, // 필수 항목목
+        required:true, // 필수 항목
     },
 });
 
