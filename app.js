@@ -3,6 +3,7 @@ const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const connectDb = require("./config/db");
 const cookieParser = require("cookie-parser");
+const session = require("express-session"); // 🔹 세션 추가
 const methodOverride = require("method-override");
 const jwt = require("jsonwebtoken");
 
@@ -20,6 +21,14 @@ app.set("views", "./views");
 
 // 정적 파일
 app.use(express.static("public"));
+
+// 세션 미들웨어 추가
+app.use(session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

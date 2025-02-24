@@ -10,18 +10,32 @@
     </title>
     <meta name="description" content="My first application using Node.js, Express and MongoDB">
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .user-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .user-container a {
+            display: block;
+            font-weight: bold;
+            font-size: 16px;
+            text-decoration: underline;
+            /* 🔹 밑줄 추가 */
+            color: inherit;
+            /* 🔹 기존 글자색 유지 */
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 
 <body>
 
     <div class="container">
 
-        <!-- 헤더 : 로고, 상단 메뉴, 로그인 -->
         <header class="header">
-            <!-- 로고 -->
-            <a href="/" class="header-logo">Admin Page</a>
+            <a href="/" class="header-logo">MyStory</a>
 
-            <!-- 상단 메뉴 -->
             <nav class="header-nav">
                 <ul>
                     <li>
@@ -36,13 +50,19 @@
                 </ul>
             </nav>
 
-            <!-- 로그아웃 -->
             <div class="header-button">
-                <a href="/logout">로그아웃</a>
+                <% if (user) { %>
+                    <div class="user-container">
+                        <a href="/admin">
+                            <%= user.username %>님, 반갑습니다!</a>
+                        <a href="/logout" onclick="setTimeout(() => { location.reload(); }, 100);">로그아웃</a>
+                    </div>
+                    <% } else { %>
+                        <a href="/admin">로그인</a>
+                        <% } %>
             </div>
         </header>
 
-        <!-- 메인 : 실제 내용이 들어갈 부분 -->
         <main class="main">
             <%- body %>
         </main>

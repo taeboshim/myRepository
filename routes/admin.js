@@ -18,7 +18,7 @@ const checkLogin = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, jwtSecret);
         req.userId = decoded.id;
-        res.locals.isAuthenticated = true;  // 로그인 상태 유지
+        res.locals.isAuthenticated = true; // 로그인 상태 유지
         next();
     } catch (error) {
         res.clearCookie("token");
@@ -36,10 +36,9 @@ router.get("/admin", (req, res) => {
     res.render("admin/index", { locals, layout: adminLayout2 });
 });
 
-// 로그인 처리
 router.post(
     "/admin",
-    asyncHandler(async (req, res) => {
+    asyncHandler(async(req, res) => {
         const { username, password } = req.body;
 
         const user = await User.findOne({ username });
@@ -54,6 +53,9 @@ router.post(
 
         const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: "1d" });
 
+        // 🔹 사용자 정보를 세션에 저장
+        req.session.user = { id: user._id, username: user.username };
+
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -61,7 +63,7 @@ router.post(
             maxAge: 24 * 60 * 60 * 1000,
         });
 
-        res.redirect("/allPosts");
+        res.redirect("/");
     })
 );
 
@@ -73,7 +75,7 @@ router.get("/register", (req, res) => {
 // 🔹 회원가입 처리
 router.post(
     "/register",
-    asyncHandler(async (req, res) => {
+    asyncHandler(async(req, res) => {
         const { username, password } = req.body;
 
         // 이미 존재하는 사용자 확인
@@ -101,15 +103,15 @@ router.post(
 router.get(
     "/allPosts",
     checkLogin,
-    asyncHandler(async(req,res)=>{
-        const locals={
-            title:"Posts",
+    asyncHandler(async(req, res) => {
+        const locals = {
+            title: "Posts",
         };
-        const data=await Post.find().sort({updateAt:"desc", createdAt:"desc"}); // 전체 게시물 가져오기
-        res.render("admin/allPosts",{ // locals값과 data 넘기기
+        const data = await Post.find().sort({ updateAt: "desc", createdAt: "desc" }); // 전체 게시물 가져오기
+        res.render("admin/allPosts", { // locals값과 data 넘기기
             locals,
             data,
-            layout:adminLayout,
+            layout: adminLayout,
         });
     })
 );
@@ -118,19 +120,26 @@ router.get(
 
 // 로그아웃
 router.get("/logout", (req, res) => {
-    res.clearCookie("token");
-    res.redirect("/");
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("세션 삭제 오류:", err);
+            return res.status(500).json({ message: "로그아웃 중 오류 발생" });
+        }
+        res.clearCookie("token"); // 유지 (사용자 인증 쿠키 삭제)
+        res.redirect("/");
+    });
 });
+
 
 // 게시물 작성
 router.get(
     "/add",
     checkLogin,
-    asyncHandler(async (req,res)=>{
-        const locals={
-            title:"게시물 작성",
+    asyncHandler(async(req, res) => {
+        const locals = {
+            title: "게시물 작성",
         };
-        res.render("admin/add",{
+        res.render("admin/add", {
             locals,
             layout: adminLayout,
         });
@@ -141,12 +150,12 @@ router.get(
 router.post(
     "/add",
     checkLogin,
-    asyncHandler(async (req,res)=>{
-        const {title, body}=req.body;
+    asyncHandler(async(req, res) => {
+        const { title, body } = req.body;
 
-        const newPost=new Post({
-            title:title,
-            body:body,
+        const newPost = new Post({
+            title: title,
+            body: body,
         });
 
         await Post.create(newPost);
@@ -158,16 +167,16 @@ router.post(
 router.get(
     "/edit/:id",
     checkLogin,
-    asyncHandler(async (req,res)=>{
-        const locals={
-            title:"게시물 편집",
+    asyncHandler(async(req, res) => {
+        const locals = {
+            title: "게시물 편집",
         };
         //id 값을 사용해서 게시물 가져오기
-        const data=await Post.findOne({ _id:req.params.id});
+        const data = await Post.findOne({ _id: req.params.id });
         res.render("admin/edit", {
             locals,
             data,
-            layout:adminLayout,
+            layout: adminLayout,
         });
     })
 );
@@ -176,11 +185,11 @@ router.get(
 router.put(
     "/edit/:id",
     checkLogin,
-    asyncHandler(async (req,res)=>{
-        await Post.findByIdAndUpdate(req.params.id,{
-            title:req.body.title,
-            body:req.body.body,
-            createdAt:Date.now(),
+    asyncHandler(async(req, res) => {
+        await Post.findByIdAndUpdate(req.params.id, {
+            title: req.body.title,
+            body: req.body.body,
+            createdAt: Date.now(),
         });
         // 수정한 후 전체 목록 다시 표시하기
         res.redirect("/allPosts");
@@ -191,10 +200,10 @@ router.put(
 router.delete(
     "/delete/:id",
     checkLogin,
-    asyncHandler(async (req,res)=>{
-        await Post.deleteOne({ _id: req.params.id});
+    asyncHandler(async(req, res) => {
+        await Post.deleteOne({ _id: req.params.id });
         res.redirect("/allPosts");
     })
 );
 
-module.exports=router;
+module.exports = router;
