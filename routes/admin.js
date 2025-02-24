@@ -151,11 +151,12 @@ router.post(
     "/add",
     checkLogin,
     asyncHandler(async(req, res) => {
-        const { title, body } = req.body;
+        const { title, body, style } = req.body;
 
         const newPost = new Post({
             title: title,
             body: body,
+            style: style,
         });
 
         await Post.create(newPost);

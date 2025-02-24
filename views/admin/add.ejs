@@ -5,10 +5,19 @@
 
 <form action="/add" method="POST">
     <label for="title"><b>제목</b></label>
-    <input type="text" placeholder="게시물 제목" name="title" id="title">
+    <input type="text" placeholder="게시물 제목" name="title" id="title" required>
 
     <label for="body"><b>내용</b></label>
-    <textarea placeholder="게시물 내용" name="body" cols="50" rows="10"></textarea>
+    <textarea placeholder="게시물 내용" name="body" cols="50" rows="10" required></textarea>
+
+    <!-- 🔹 화풍 선택 -->
+    <label for="style"><b>화풍 선택</b></label>
+    <select name="style" id="style">
+        <option value="anime">📌 애니메이션 스타일</option>
+        <option value="realistic">📌 사실적인 스타일</option>
+        <option value="watercolor">📌 수채화 스타일</option>
+        <option value="pixelart">📌 픽셀아트 스타일</option>
+    </select>
 
     <input type="submit" value="등록" class="btn">
 </form>

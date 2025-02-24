@@ -43,6 +43,7 @@ router.get("/post/:id", asyncHandler(async(req, res) => {
 }));
 
 // 🔹 AI 이미지 생성 및 저장 (이미지를 파일로 저장하고, DB에는 Buffer 데이터 저장)
+// 🔹 AI 이미지 생성 및 저장 (화풍 반영)
 router.get("/generate-image/:id", asyncHandler(async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
@@ -50,48 +51,34 @@ router.get("/generate-image/:id", asyncHandler(async (req, res) => {
             return res.status(404).json({ message: "게시물을 찾을 수 없습니다" });
         }
 
-        // 🔹 기존 이미지가 있으면 API 호출 없이 제공
-        if (post.image) {
-            return res.json({ message: "이미 이미지가 저장되어 있습니다." });
-        }
+        // 🔹 선택된 화풍 스타일을 프롬프트에 반영
+        const styleMap = {
+            anime: "vibrant anime-style",
+            realistic: "photo-realistic",
+            watercolor: "soft watercolor painting",
+            pixelart: "8-bit pixel art",
+        };
+        const selectedStyle = styleMap[post.style] || "anime";
 
-       // 🔹 DALL·E API를 호출하여 이미지 생성
-       const prompt = `Create a high-quality, detailed anime-style illustration inspired by the following post. 
-       The image should visually represent the theme and emotions conveyed in the post.
-       
-       Title: "${post.title}"
-       Content: "${post.body}"
-       
-       Ensure that the image follows a vibrant anime aesthetic, with expressive characters, rich colors, and dynamic composition.
-       The background should complement the theme of the post, adding depth and storytelling elements.
-       The lighting should enhance the mood, and the art style should resemble modern anime illustrations.`;
-       
-       const dalleResponse = await dalle.text2im({ prompt });
-       const imageUrl = dalleResponse;
+        const prompt = `Create a high-quality, ${selectedStyle} illustration inspired by the following post. 
+        The image should visually represent the theme and emotions conveyed in the post.
 
-        // 🔹 AI 이미지 다운로드
+        Title: "${post.title}"
+        Content: "${post.body}"
+
+        Ensure that the image follows the selected style: ${selectedStyle}.`;
+
+        const dalleResponse = await dalle.text2im({ prompt });
+        const imageUrl = dalleResponse;
+
+        // 이미지 처리 및 저장 (이전 코드 유지)
         const imageResponse = await axios.get(imageUrl, { responseType: "arraybuffer" });
         const imageBuffer = imageResponse.data;
-
-        // 🔹 저장할 파일 경로 설정
         const imageFileName = `post_${post._id}.jpg`;
         const imagePath = path.join(uploadDir, imageFileName);
+        fs.writeFileSync(imagePath, await sharp(imageBuffer).jpeg({ quality: 90 }).toBuffer());
 
-        // 🔹 파일 저장 전 폴더 확인 (다시 체크)
-       if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-
-        // 🔹 이미지 변환 및 저장 (.jpg 변환)
-        const jpgBuffer = await sharp(imageBuffer)
-            .jpeg({ quality: 90 })
-            .toBuffer();
-
-         //🔹 변환된 이미지 파일을 `uploads` 폴더에 저장
-        fs.writeFileSync(imagePath, jpgBuffer);
-
-        // 🔹 변환된 이미지 데이터를 DB에 저장 (Binary)
-        post.image = jpgBuffer;
+        post.image = imageBuffer;
         await post.save();
 
         res.json({ message: "이미지가 저장되었습니다.", imagePath: `/uploads/${imageFileName}` });
@@ -100,6 +87,7 @@ router.get("/generate-image/:id", asyncHandler(async (req, res) => {
         res.status(500).json({ message: "이미지 생성 중 오류 발생" });
     }
 }));
+
 
 // 🔹 DB에서 이미지 파일을 제공하는 엔드포인트 추가
 router.get("/image/:id", asyncHandler(async (req, res) => {
