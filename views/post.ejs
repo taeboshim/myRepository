@@ -18,11 +18,8 @@
     <h3>오늘의 내 모습</h3>
 
     <% if (data.image) { %>
-        <!-- 저장된 이미지가 있을 경우 바로 표시 (Base64 인코딩) -->
-        <img id="generatedImage" 
-             src="data:<%= data.contentType %>;base64,<%= data.image.toString('base64') %>" 
-             alt="AI 생성 이미지" 
-             style="max-width: 100%;">
+        <!-- DB에 저장된 이미지 표시 -->
+        <img id="generatedImage" src="/image/<%= data._id %>" alt="AI 생성 이미지" style="max-width: 100%;">
     <% } else { %>
         <!-- 로딩 애니메이션 -->
         <div id="loadingIcon" class="loading-spinner"></div>
@@ -35,9 +32,8 @@
             fetch(`/generate-image/<%= data._id %>`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.image) {
-                        // Base64 데이터 URL로 변환하여 이미지 표시
-                        document.getElementById("generatedImage").src = `data:${data.contentType};base64,${data.image}`;
+                    if (data.imagePath) {
+                        document.getElementById("generatedImage").src = data.imagePath;
                         document.getElementById("generatedImage").style.display = "block"; // 이미지 표시
                     } else {
                         document.getElementById("generatedImage").alt = "이미지를 생성할 수 없습니다.";

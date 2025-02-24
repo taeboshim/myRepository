@@ -11,6 +11,14 @@ const { dalle } = require("../openai");
 const mainLayout = "../views/layouts/main.ejs";
 const mainLayout2 = "../views/layouts/main2.ejs"; // 로그인 후 레이아웃 추가
 
+// 🔹 업로드 폴더 경로 설정
+const uploadDir = path.join(__dirname, "../public/uploads");
+
+// 🔹 `public/uploads` 폴더가 없으면 생성
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 router.get(["/", "/home"], asyncHandler(async(req, res) => {
     const locals = { title: "Home" };
     const data = await Post.find({}).sort({ createdAt: -1 });
@@ -26,7 +34,6 @@ router.get(["/", "/home"], asyncHandler(async(req, res) => {
 router.get("/post/:id", asyncHandler(async(req, res) => {
     const data = await Post.findOne({ _id: req.params.id });
 
-    // 이미지 바이너리를 Base64로 변환하여 뷰에서 표시
     let imageBase64 = null;
     if (data.image) {
         imageBase64 = `data:${data.contentType};base64,${data.image.toString("base64")}`;
@@ -36,23 +43,31 @@ router.get("/post/:id", asyncHandler(async(req, res) => {
 }));
 
 // 🔹 AI 이미지 생성 및 저장 (이미지를 파일로 저장하고, DB에는 Buffer 데이터 저장)
-router.get("/generate-image/:id", asyncHandler(async(req, res) => {
+router.get("/generate-image/:id", asyncHandler(async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post) {
             return res.status(404).json({ message: "게시물을 찾을 수 없습니다" });
         }
 
-        // 🔹 이미지가 이미 존재하면 API 호출 없이 반환
+        // 🔹 기존 이미지가 있으면 API 호출 없이 제공
         if (post.image) {
-            return res.json({ message: "이미지가 이미 존재합니다" });
+            return res.json({ message: "이미 이미지가 저장되어 있습니다." });
         }
 
-        // 🔹 AI 이미지 생성 요청
-        const prompt = `Create a visually stunning and contextually accurate image based on the post: "${post.title}". 
-Illustrate a scene that best represents the main idea, highlighting key themes and emotions from the text: "${post.body}". 
-Incorporate essential elements that define the atmosphere and narrative of the post, ensuring an engaging and artistic depiction.
-Avoid using any text, words, or letter-like symbols. Allow for abstract symbols like arrows or icons if necessary.`;
+       // 🔹 DALL·E API를 호출하여 이미지 생성
+       const prompt = `Create a high-quality, detailed anime-style illustration inspired by the following post. 
+       The image should visually represent the theme and emotions conveyed in the post.
+       
+       Title: "${post.title}"
+       Content: "${post.body}"
+       
+       Ensure that the image follows a vibrant anime aesthetic, with expressive characters, rich colors, and dynamic composition.
+       The background should complement the theme of the post, adding depth and storytelling elements.
+       The lighting should enhance the mood, and the art style should resemble modern anime illustrations.`;
+       
+       const dalleResponse = await dalle.text2im({ prompt });
+       const imageUrl = dalleResponse;
 
         // 🔹 AI 이미지 다운로드
         const imageResponse = await axios.get(imageUrl, { responseType: "arraybuffer" });
@@ -60,14 +75,19 @@ Avoid using any text, words, or letter-like symbols. Allow for abstract symbols 
 
         // 🔹 저장할 파일 경로 설정
         const imageFileName = `post_${post._id}.jpg`;
-        const imagePath = path.join(__dirname, "../public/uploads", imageFileName);
+        const imagePath = path.join(uploadDir, imageFileName);
+
+        // 🔹 파일 저장 전 폴더 확인 (다시 체크)
+       if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
 
         // 🔹 이미지 변환 및 저장 (.jpg 변환)
         const jpgBuffer = await sharp(imageBuffer)
             .jpeg({ quality: 90 })
             .toBuffer();
 
-        // 🔹 변환된 이미지 파일을 `uploads` 폴더에 저장
+         //🔹 변환된 이미지 파일을 `uploads` 폴더에 저장
         fs.writeFileSync(imagePath, jpgBuffer);
 
         // 🔹 변환된 이미지 데이터를 DB에 저장 (Binary)
@@ -82,7 +102,7 @@ Avoid using any text, words, or letter-like symbols. Allow for abstract symbols 
 }));
 
 // 🔹 DB에서 이미지 파일을 제공하는 엔드포인트 추가
-router.get("/image/:id", asyncHandler(async(req, res) => {
+router.get("/image/:id", asyncHandler(async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post || !post.image) {
@@ -98,10 +118,11 @@ router.get("/image/:id", asyncHandler(async(req, res) => {
 }));
 
 // 🔹 정적 파일 제공 (저장된 이미지 서빙)
-router.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
+router.use("/uploads", express.static(uploadDir));
 
 router.get("/about", (req, res) => {
     res.render("about", { layout: mainLayout });
 });
 
 module.exports = router;
+    
