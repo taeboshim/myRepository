@@ -49,29 +49,40 @@ router.get("/generate-image/:id", asyncHandler(async (req, res) => {
             return res.json({ message: "이미 이미지가 저장되어 있습니다." });
         }
 
-        // 🔹 DALL·E API를 호출하여 이미지 생성
-        const prompt = `Create a high-quality, detailed anime-style illustration inspired by the following post. 
-        The image should visually represent the theme and emotions conveyed in the post.
-        
-        Title: "${post.title}"
-        Content: "${post.body}"
-        
-        Ensure that the image follows a vibrant anime aesthetic, with expressive characters, rich colors, and dynamic composition.
-        The background should complement the theme of the post, adding depth and storytelling elements.
-        The lighting should enhance the mood, and the art style should resemble modern anime illustrations.`;
-        
-        const dalleResponse = await dalle.text2im({ prompt });
-        const imageUrl = dalleResponse;
+       // 🔹 DALL·E API를 호출하여 이미지 생성
+       const prompt = `Create a high-quality, detailed anime-style illustration inspired by the following post. 
+       The image should visually represent the theme and emotions conveyed in the post.
+       
+       Title: "${post.title}"
+       Content: "${post.body}"
+       
+       Ensure that the image follows a vibrant anime aesthetic, with expressive characters, rich colors, and dynamic composition.
+       The background should complement the theme of the post, adding depth and storytelling elements.
+       The lighting should enhance the mood, and the art style should resemble modern anime illustrations.`;
+       
+       const dalleResponse = await dalle.text2im({ prompt });
+       const imageUrl = dalleResponse;
 
         // 🔹 AI 이미지 다운로드
         const imageResponse = await axios.get(imageUrl, { responseType: "arraybuffer" });
         const imageBuffer = imageResponse.data;
 
+        // 🔹 저장할 파일 경로 설정
+        const imageFileName = `post_${post._id}.jpg`;
+        const imagePath = path.join(uploadDir, imageFileName);
+
+        // 🔹 파일 저장 전 폴더 확인 (다시 체크)
+       if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
 
         // 🔹 이미지 변환 및 저장 (.jpg 변환)
         const jpgBuffer = await sharp(imageBuffer)
             .jpeg({ quality: 90 })
             .toBuffer();
+
+         //🔹 변환된 이미지 파일을 `uploads` 폴더에 저장
+        fs.writeFileSync(imagePath, jpgBuffer);
 
         // 🔹 변환된 이미지 데이터를 DB에 저장 (Binary)
         post.image = jpgBuffer;
@@ -107,4 +118,4 @@ router.get("/about", (req, res) => {
     res.render("about", { layout: mainLayout });
 });
 
-module.exports = router;    
+module.exports = router;

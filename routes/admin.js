@@ -150,7 +150,7 @@ router.post(
         });
 
         await Post.create(newPost);
-        res.redirect("/allPosts");
+        res.redirect(`/post/${newPost._id}`);
     })
 );
 
