@@ -157,6 +157,7 @@ router.post(
             title: title,
             body: body,
             style: style,
+            createdAt: Date.now(),
         });
 
         await Post.create(newPost);
